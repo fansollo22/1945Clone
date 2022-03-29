@@ -8,9 +8,12 @@ using UnityEngine;
 
 public class Chunk : MonoBehaviour
 {
-    Block[,,] blocks;
+    private Block[,,] blocks = new Block[chunkSize, chunkSize, chunkSize];
     public static int chunkSize = 16;
     public bool update = true;
+
+    public WorldGeneration world;
+    public WorldPosition pos;
 
     MeshFilter filter;
     MeshCollider col;
@@ -23,30 +26,18 @@ public class Chunk : MonoBehaviour
     {
         filter = gameObject.GetComponent<MeshFilter>();
         col = gameObject.GetComponent<MeshCollider>();
-
-        blocks = new Block[chunkSize, chunkSize, chunkSize];
-
-        for (int x = 0; x < chunkSize; x++)
-        {
-            for (int y = 0; y < chunkSize; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    blocks[x, y, z] = new BlockAir();
-                }
-            }
-        }
-        blocks[3, 5, 2] = new Block();
-        blocks[4, 5, 2] = new BlockGrass();
-        UpdateChunk();
     }
 
     /**
-     * Returneaza blocul de pe pozitia (x,y,z).
+     * Functie default de Unity ce este chemata odata la fiecare frame.
      */
-    public Block GetBlock(int x, int y, int z)
+    void Update()
     {
-        return blocks[x, y, z];
+        if (update)
+        {
+            update = false;
+            UpdateChunk();
+        }
     }
 
     /**
@@ -66,6 +57,45 @@ public class Chunk : MonoBehaviour
             }
         }
         RenderMesh(meshData);
+    }
+
+    /**
+     * Cauta block-ul recursiv. Daca nu este in chunk-ul de pe pozitia x,y,z
+     * Chemam din nou functia sarind la urmatorul chunk.
+     */
+    public Block GetBlock(int x, int y, int z)
+    {
+        if (InRange(x) && InRange(y) && InRange(z))
+            return blocks[x, y, z];
+
+        return world.GetBlock(pos.x + x, pos.y + y, pos.z + z);
+    }
+
+    /**
+     * Functie ce adauga block-uri in chunk-ul curent bazat pe coordonatele x,y,z.
+     * Daca coordonatele nu sunt in range, trecem la chunk-ul urmator.
+     */
+    public void SetBlock(int x, int y, int z, Block block)
+    {
+        if (InRange(x) && InRange(y) && InRange(z))
+        {
+            blocks[x, y, z] = block;
+        }
+        else
+        {
+            world.SetBlock(pos.x + x, pos.y + y, pos.z + z, block);
+        }
+    }
+
+    /**
+     * Functie ajutatoare ce ne spune daca o coordonata este in range-ul chunk-ului.
+     */
+    public static bool InRange(int index)
+    {
+        if (index < 0 || index >= chunkSize)
+            return false;
+
+        return true;
     }
 
     /**

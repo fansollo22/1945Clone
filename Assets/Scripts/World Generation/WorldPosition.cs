@@ -1,11 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class World : MonoBehaviour
+public class WorldPosition
 {
     public int x, y, z;
-    public WorldPos(int x, int y, int z)
+
+    public WorldPosition()
+    {
+
+    }
+
+    public WorldPosition(int x, int y, int z)
     {
         this.x = x;
         this.y = y;
@@ -14,10 +19,10 @@ public class World : MonoBehaviour
 
     public override bool Equals(object obj)
     {
-        if (!(obj is WorldPos))
+        if (!(obj is WorldPosition))
             return false;
 
-        WorldPos pos = (WorldPos)obj;
+        WorldPosition pos = (WorldPosition)obj;
 
         if (pos.x == x && pos.y == y && pos.z == z)
         {
@@ -25,5 +30,10 @@ public class World : MonoBehaviour
         }
 
         return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return x ^ y * z;
     }
 }
