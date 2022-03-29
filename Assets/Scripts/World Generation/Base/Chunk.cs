@@ -37,6 +37,7 @@ public class Chunk : MonoBehaviour
             }
         }
         blocks[3, 5, 2] = new Block();
+        blocks[4, 5, 2] = new BlockGrass();
         UpdateChunk();
     }
 
@@ -68,12 +69,23 @@ public class Chunk : MonoBehaviour
     }
 
     /**
-     * Assigneaza noul mesh generat la obiect.
+     * Assigneaza noul mesh generat la obiect impreuna cu coliziune.
      */
     void RenderMesh(MeshData meshData)
     {
         filter.mesh.Clear();
         filter.mesh.vertices = meshData.vertices.ToArray();
         filter.mesh.triangles = meshData.triangles.ToArray();
+
+        filter.mesh.uv = meshData.uv.ToArray();
+        filter.mesh.RecalculateNormals();
+
+        col.sharedMesh = null;
+        Mesh mesh = new Mesh();
+        mesh.vertices = meshData.colVertices.ToArray();
+        mesh.triangles = meshData.colTriangles.ToArray();
+        mesh.RecalculateNormals();
+
+        col.sharedMesh = mesh;
     }
 }

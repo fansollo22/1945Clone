@@ -11,8 +11,7 @@ public class BlockAir : Block
     /**
      * Da override la functia base. Fiind un bloc de aer, nu avem nevoie de meshdata.
      */
-    public override MeshData Blockdata
-        (Chunk chunk, int x, int y, int z, MeshData meshData)
+    public override MeshData Blockdata(Chunk chunk, int x, int y, int z, MeshData meshData)
     {
         return meshData;
     }
