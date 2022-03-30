@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class WorldGeneration : MonoBehaviour
@@ -8,15 +9,14 @@ public class WorldGeneration : MonoBehaviour
 
     public GameObject chunk;
 
-
     // Start is called before the first frame update
     void Start()
     {
-        for (int x = -2; x < 2; x++)
+        for (int x = -4; x < 4; x++)
         {
-            for (int y = -1; y < 1; y++)
+            for (int y = -1; y < 3; y++)
             {
-                for (int z = -1; z < 1; z++)
+                for (int z = -4; z < 4; z++)
                 {
                     CreateChunk(x * 16, y * 16, z * 16);
                 }
@@ -46,23 +46,9 @@ public class WorldGeneration : MonoBehaviour
 
         chunkDictionary.Add(worldPos, newChunk);
 
-        for (int xi = 0; xi < 16; xi++)
-        {
-            for (int yi = 0; yi < 16; yi++)
-            {
-                for (int zi = 0; zi < 16; zi++)
-                {
-                    if (yi <= 7)
-                    {
-                        SetBlock(x + xi, y + yi, z + zi, new BlockGrass());
-                    }
-                    else
-                    {
-                        SetBlock(x + xi, y + yi, z + zi, new BlockAir());
-                    }
-                }
-            }
-        }
+        TerrainGeneration terrainGen = new TerrainGeneration();
+        newChunk = terrainGen.ChunkGen(newChunk);
+        newChunk.SetBlocksUnmodified();
     }
 
     /**
@@ -111,6 +97,9 @@ public class WorldGeneration : MonoBehaviour
     /**
      * Adauga block in chunk-ul de pe pozitia x,y,z.
      * Deasemenea setam update = true pentru a updata mesh-ul chunkului.
+     * 
+     * Tot odata verificam daca chunk-urile adiacente au fost lovite.
+     * Daca au fost lovite (pentru fiecare coordonata x,y,z verificam daca pozitia locala este inafara chunk-ului curent) updatam chunk-urile. 
      */
     public void SetBlock(int x, int y, int z, Block block)
     {
@@ -120,6 +109,26 @@ public class WorldGeneration : MonoBehaviour
         {
             chunk.SetBlock(x - chunk.pos.x, y - chunk.pos.y, z - chunk.pos.z, block);
             chunk.update = true;
+
+            UpdateIfEqual(x - chunk.pos.x, 0, new WorldPosition(x - 1, y, z));
+            UpdateIfEqual(x - chunk.pos.x, Chunk.chunkSize - 1, new WorldPosition(x + 1, y, z));
+            UpdateIfEqual(y - chunk.pos.y, 0, new WorldPosition(x, y - 1, z));
+            UpdateIfEqual(y - chunk.pos.y, Chunk.chunkSize - 1, new WorldPosition(x, y + 1, z));
+            UpdateIfEqual(z - chunk.pos.z, 0, new WorldPosition(x, y, z - 1));
+            UpdateIfEqual(z - chunk.pos.z, Chunk.chunkSize - 1, new WorldPosition(x, y, z + 1));
+        }
+    }
+
+    /**
+     * Functie ce ia chunk-ul si il seteaza pentru updatare daca coordonatele sunt egale.
+     */
+    void UpdateIfEqual(int value1, int value2, WorldPosition pos)
+    {
+        if (value1 == value2)
+        {
+            Chunk chunk = GetChunk(pos.x, pos.y, pos.z);
+            if (chunk != null)
+                chunk.update = true;
         }
     }
 }

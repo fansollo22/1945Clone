@@ -10,6 +10,8 @@ public class Block
 
     const float tileSize = 0.25f;
 
+    public bool changed = true;
+
     /**
      * Constructorul clasei.
      */
